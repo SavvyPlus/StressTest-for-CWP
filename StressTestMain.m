@@ -31,13 +31,13 @@ net_revenue = zeros(18720,300,4,2);
 for i = 1:300
     for j = 1:4
         fss_temp = fss(j);
-        x(:,i,j,:) = lpfunction(wind_gen(:,i),mlf,fss_temp,spot_prices(:,i));
+        x(:,i,j) = lpfunction(wind_gen(:,i),mlf,fss_temp,spot_prices(:,i));
         for k = 1:2 % 1: Original spot price, 2: Ajusted spot price
             spot_prices_adj(:,i,j,k) = spot_prices(:,i) + x(:,i,j,k)*(k-1);
             % spot_revenue
             spot_revenue(:,i,j,k) = mlf.*wind_gen(:,i).*spot_prices_adj(:,i,j,k)/2;
             % contract for difference (fixed block)
-            cfd_fb(:,i,j,k) = (ssp - spot_prices_adj(:,i,j,k)).*fss/2;
+            cfd_fb(:,i,j,k) = (ssp - spot_prices_adj(:,i,j,k)).*fss_temp/2;
             % contract for difference (PPA)
             cfd_ppa(:,i,j,k) = (PPA_price-spot_prices_adj(:,i,j,k))*183/273.*wind_gen(:,i)/2;
             %net revenue
@@ -50,7 +50,7 @@ for i = 1:300
             % rolling 4-weeks revenue
             monthly_revenue = zeros(52,i,j,k);
             for q = 1:length(monthly_revenue)
-                monthly_revenue(q,i,j,k) = sum(weekly_revenue(q:q+3),i,j,k);
+                monthly_revenue(q,i,j,k) = sum(weekly_revenue((q:q+3),i,j,k));
             end
 
         end
