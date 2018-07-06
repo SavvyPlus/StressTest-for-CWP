@@ -18,5 +18,7 @@ The purpose of the stress test is to evaluate how worse the revenue can be under
 **Subject to:**
 
 **a. Spot price may be adjusted up to the maximum of $14,200/MWh.**
+
 **b. The spot price adjustment cannnot be negative.**
+
 **c. The Cumulative Price Threshold cannot exceed the maximum where the initial starting value for the CPT is $80\*336=$26880.**
