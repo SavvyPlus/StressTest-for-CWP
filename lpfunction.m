@@ -3,7 +3,7 @@
 
 function y = lpfunction(wind_gen,mlf,fss,spot_prices)
 % Minimize the objective function
-f4 = 90/273.*(wind_gen-273)/2*mlf+fss/2;
+f4 = (273-152)/273.*(wind_gen-273)/2*mlf+fss/2;
 f = transpose(f4);
 
 A = eye(18720);

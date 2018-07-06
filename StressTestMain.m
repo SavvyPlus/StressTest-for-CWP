@@ -15,48 +15,49 @@ wind_gen = NewGen.Output_Sapphire(1:18720,1:300);
 mlf=0.9; 
 % sold swap price($/MWh) (fixed block)
 ssp=85;
-% flat swap sold(MW): 0; -9; -20; -30
-fss = [0 -9 -20 -30];
+% flat swap sold(MW): 0; -9; -20; -30; -40; -50
+fss = [0 -9 -20 -30 -40 -50];
 % PPA price($/MWh)
 %PPA_price = 80.95;
 PPA_price_1 = 80.33;
 PPA_price_2 = 84.73;
 
 %x1 = lpfunction(wind_gen(:,1),mlf,fss,spot_prices(:,1));
-% As we have 300 simulations * 4 fss * 2(adjusted/original) situations, so
-% here using 4 dimensional arrays to store the results
-x = zeros(18720,300,4,2);
-spot_prices_adj = zeros(18720,300,4,2);
-spot_revenue = zeros(18720,300,4,2);
-cfd_fb = zeros(18720,300,4,2);
-cfd_ppa = zeros(18720,300,4,2);
-net_revenue = zeros(18720,300,4,2);
-weekly_revenue = zeros(55,300,4,2);
-monthly_revenue = zeros(52,300,4,2);
+% As we have 300 simulations * 6 fss * 2 spot(adjusted/original) situations,
+% so here using 4 dimensional arrays to store the results
+x_test = zeros(18720,300,6,2);
+spot_prices_adj = zeros(18720,300,6,2);
+spot_revenue = zeros(18720,300,6,2);
+cfd_fb = zeros(18720,300,6,2);
+cfd_ppa = zeros(18720,300,6,2);
+net_revenue = zeros(18720,300,6,2);
+weekly_revenue = zeros(55,300,6,2);
+monthly_revenue = zeros(52,300,6,2);
 for i = 1:300
-    for j = 1:4
+    for j = 1:6
         fss_temp = fss(j);
-        x(:,i,j) = lpfunction(wind_gen(:,i),mlf,fss_temp,spot_prices(:,i));
+        x_test(:,i,j) = lpfunction(wind_gen(:,i),mlf,fss_temp,spot_prices(:,i));
+        % adjustment = x_test(:,i,j);
         for k = 1:2 % 1: Original spot price, 2: Ajusted spot price
-            spot_prices_adj(:,i,j,k) = spot_prices(:,i) + x(:,i,j)*(k-1);
+            spot_prices_adj(:,i,j,k) = spot_prices(:,i) + x_test(:,i,j)*(k-1);
             % spot_revenue
             spot_revenue(:,i,j,k) = mlf.*wind_gen(:,i).*spot_prices_adj(:,i,j,k)/2;
             % contract for difference (fixed block)
-            cfd_fb(:,i,j,k) = (ssp - spot_prices_adj(:,i,j,k)).*fss_temp/2;
+            cfd_fb(:,i,j,k) = (spot_prices_adj(:,i,j,k) - ssp).*fss_temp/2;
             % contract for difference (PPA)
             % Period 1: 1-Jan-19 ~ 31-Mar-19; Period 2: 1-Apr-19 ~ 
             for n = 1:4320
-                cfd_ppa(n,i,j,k) = (PPA_price_1-spot_prices_adj(n,i,j,k))*193/273.*wind_gen(n,i)/2;
+                cfd_ppa(n,i,j,k) = (spot_prices_adj(n,i,j,k)-PPA_price_1)*(-193/273).*wind_gen(n,i)/2;
             end
             for n = 4321:18720
-                cfd_ppa(n,i,j,k) = (PPA_price_2-spot_prices_adj(n,i,j,k))*152/273.*wind_gen(n,i)/2;
+                cfd_ppa(n,i,j,k) = (spot_prices_adj(n,i,j,k)-PPA_price_2)*(-152/273).*wind_gen(n,i)/2;
             end
             %net revenue
             net_revenue(:,i,j,k) = spot_revenue(:,i,j,k)+cfd_fb(:,i,j,k)+cfd_ppa(:,i,j,k);
             % weekly revenue
             %weekly_revenue = zeros(55,i,j,k);
             for p = 1:55
-                weekly_revenue(p,i,j,k) = sum(net_revenue(241+336*(p-1):241+336*p-1,i,j,k));
+                weekly_revenue(p,i,j,k) = sum(net_revenue(241+336*(p-1): 241+336*p-1,  i,j,k));
             end
             % rolling 4-weeks revenue
             %monthly_revenue = zeros(52,i,j,k);
