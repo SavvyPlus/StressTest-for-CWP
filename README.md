@@ -49,7 +49,8 @@ The net revenue consists of `Spot Revenue`, `Fixed Block Revenue`, `PPA Revenue`
 
 In the end, we will have 5 tables for Power BI to do the reporting.
 
-*Table name (Column name)*
+*Table name*
+>*Column name*
 
 **StressResults** 
 >SimNo, WeekNo, WeeklyRevenue, 4WeeklyRolling, MonthlyRevenue, HedgingScenarioMW, Stressed
