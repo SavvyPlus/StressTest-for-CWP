@@ -3,9 +3,9 @@
 % start timing
 tic;
 % Table rows: 52*11*6=3432
-Output = zeros(3432,4);
-% load('StressTest_Output_300_6_2.mat');
-% weekly_revenue = getfield(StressTest_Output_300_6_2, 'weekly_revenue');
+Output_PercentileSimulation = zeros(3432,4);
+% load('StressTest_Output_300_6_2_PriceCap.mat');
+% weekly_revenue = getfield(StressTest_Output_300_6_2_PriceCap, 'weekly_revenue');
 
 % Find SimNo for certain percentile
 p = [100 95 75 50 25 5 4 3 2 1 0]; % percentiles we are interested in.
@@ -42,10 +42,10 @@ for i = 1:52
 end
 
 % Write Data to Excel
-Output(:,1:2) = [WeekNo SimNo];
+Output_PercentileSimulation(:,1:2) = [WeekNo SimNo];
 
 filename = 'PercentileSimulation.xlsx';
-xlswrite(filename, Output);
+xlswrite(filename, Output_PercentileSimulation);
 
 % end timing
 toc;

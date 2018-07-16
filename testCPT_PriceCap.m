@@ -6,7 +6,7 @@ tic;
 
 % load('HH_Sim_Spot_1000_NSW1_2018-04-21.mat', 'Spot_Sims', 'NewGen');
 % load('StressTest_Output_300_6_2.mat');
-spot_prices = Spot_Sims(1:18720,1:300); % original spot price
+% spot_prices = Spot_Sims(1:18720,1:300); % original spot price
 spot_prices_adj = getfield(StressTest_Output_300_6_2, 'spot_prices_adj'); % adjusted spot price
 spot_prices_adjadj = spot_prices_adj(:,:,:,2);  % adjusted according to Cap price
 wind_gen = NewGen.Output_Sapphire(1:18720,1:300);
@@ -40,16 +40,20 @@ for i = 337:18720
     CPT(i,:,:) = sum(spot_prices_adjadj(i-335:i,:,:));
 end
 
-% Set up AEMO admin spot price cap ($300)
+% Set up AEMO admin spot price cap ($300) and update CPT
 count_position = zeros(18720,300,6);
 % admin_spot_prices = zeros(18720,300,6);
 for i = 1:300
     for j = 1:6
         for k = 1:18720-336
+
             if count_position(k,i,j) ~= 0
-                continue
+%                 continue
+                adjust = false;
+            else
+                adjust = true;
             end
-            if CPT(k,i,j)-106500<0.0000001 && 106500-CPT(k,i,j)<0.0000001
+            if CPT(k,i,j)-216900<0.0000001 && 216900-CPT(k,i,j)<0.0000001 && adjust
                 for m = 1:336
                     if spot_prices_adjadj(k+m,i,j) >= 300
                         count_position(k+m,i,j) = 1;
@@ -59,10 +63,15 @@ for i = 1:300
                     end
                 end
             end
+            if k > 335
+                CPT(k,i,j) = sum(spot_prices_adjadj(k-335:k,i,j));
+            end
         end
     end
 end
-
+for i = 18385:18720
+    CPT(i,:,:) = sum(spot_prices_adjadj(i-335:i,:,:));
+end
 % Calculate the revenue
 for i = 1:300
     for j = 1:6

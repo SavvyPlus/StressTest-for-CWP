@@ -13,7 +13,7 @@ Output_SimulationWeeklyHHs = zeros(1153152,13);
 % load('Sim_No.mat');
 time_vector = NewGen.TV(1:17712,:);
 wind_gen = NewGen.Output_Sapphire(1:17712,1:300);
-spot_prices_adj = getfield(StressTest_Output_300_6_2_PriceCap, 'spot_prices_adj'); 
+% spot_prices_adj = getfield(StressTest_Output_300_6_2_PriceCap, 'spot_prices_adj'); 
 
 HH_start = datestr(datetime(time_vector)-1/48);
 HH_date = datetime(time_vector)-1/48;
@@ -157,8 +157,17 @@ for week = 1:52
     end
 end
 % Col 13: CPT
-CPT = zeros(1153152,1);
-
+CPT_inWeeklyTable = zeros(1153152,1);
+count = 0;
+for week = 1:52
+    for hedging = 1:6
+        for percentile = 1:11
+            Sim_No_temp = Sim_No(week,hedging,percentile);
+            CPT_inWeeklyTable(1+336*count:336+336*count,1) = CPT(240+1+336*(week-1):240+336+336*(week-1),Sim_No_temp,hedging);
+            count = count + 1;
+        end
+    end
+end
 % WeekNo,Scenario,Percentile,SimNo,HH,HHStart,HHEnd,HHPeriod,OriSpot,
 % StressedSpot,WindGen,PPAQty,CPT
 fid = fopen('SimulationWeeklyHalfHours.csv','w');
@@ -166,7 +175,7 @@ for dt = 1:1153152
     fprintf( fid, '%d,%d,%d,%d,%d,%s,%s,%d,%f,%f,%f,%f,%f\n',...
         WeekNo(dt),Scenario(dt),Percentile(dt),SimNo(dt),HalfHours(dt),...
         HHStart(dt),HHEnd(dt),HHPeriod(dt),OriginalSpotPrice(dt),StessedSpotPrice(dt),...
-        WindGen(dt),PPAQty(dt),CPT(dt));
+        WindGen(dt),PPAQty(dt),CPT_inWeeklyTable(dt));
 end
 fclose( fid );
 
