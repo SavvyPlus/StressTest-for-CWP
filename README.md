@@ -2,7 +2,7 @@
 
 ## Background 
 
-We need to perform a stress test for CWP Renewables for their wind farm in NSW. The spot price may be adjusted up to the maximum of $14,200/MWh and the Cumulative Price Threshold (sum of spot prices for the previous 7 days) cannot exceed the maximum (7.5 x $14,200 = $106500). Under these situations, we derive the weekly revenue payments for 2019 simulations with wind generation in Sapphire Wind Farm.
+We need to perform a stress test for CWP Renewables for their wind farm in NSW. The spot price may be adjusted up to the maximum of $14,200/MWh **(UPDATE: this number has been changed to $14,500)** and the Cumulative Price Threshold (sum of spot prices for the previous 7 days) cannot exceed the maximum (7.5 x $14,200 = $106500) **(UPDATE: this number has been changed to $216,900)**. Under these situations, we derive the weekly revenue payments for 2019 simulations with wind generation in Sapphire Wind Farm.
 
 There are a set of wind farm and correlated spot prices simulations (3 scenarios), which have been built by previous analytics James Cheong. In this case, we are focused on the middle growth scenario which had 300 simulations. 
 
@@ -13,13 +13,13 @@ The simulation data can be found at
 
 ### The Mathematical Model
 
-The purpose of the stress test is to evaluate how worse the revenue can be under the situation that spot prices are adjusted up to the maximum of $14,200/MWh. The idea is to transform the Stress Test to a mathematical problem which can be solved using linear programming approach. The problem can be set up as:
+The purpose of the stress test is to evaluate how worse the revenue can be under the situation that spot prices are adjusted up to the maximum of $14,500/MWh. The idea is to transform the Stress Test to a mathematical problem which can be solved using linear programming approach. The problem can be set up as:
 
 **To minimise revenue (Objective function)**
 
 **Subject to:**
 
-**a. Spot price may be adjusted up to the maximum of $14,200/MWh.**
+**a. Spot price may be adjusted up to the maximum of $14,500/MWh.**
 
 **b. The spot price adjustment cannot be negative.**
 
@@ -35,6 +35,8 @@ The problem can be solved using [linprog](https://au.mathworks.com/help/optim/ug
 
 **WriteExcel.m** is the script to write above output data into excel for review and reporting.
 
+**testCPT_PriceCap.m** is the adjusted script to calcualte the revenues when considering the AEMO Admin Spot Price Cap (<=$300/MWh)
+
 ### The Calculation of Revenues
 
 The net revenue consists of `Spot Revenue`, `Fixed Block Revenue`, `PPA Revenue`. Simple sum.
@@ -42,3 +44,25 @@ The net revenue consists of `Spot Revenue`, `Fixed Block Revenue`, `PPA Revenue`
 1. Spot Revenue = spot price × wind generation ÷ 2 × mlf 
 2. Fixed Block Revenue = (spot price − sold swap price) × flat swap sold ÷ 2
 3. PPA Revenue = (spot price - PPA price) × (-PPAMW/273) × wind generation ÷ 2
+
+## Output
+
+In the end, we will have 5 tables for Power BI to do the reporting.
+
+*Table name*
+>*Column name*
+
+**StressResults** 
+>SimNo, WeekNo, WeeklyRevenue, 4WeeklyRolling, MonthlyRevenue, HedgingScenarioMW, Stressed
+
+**PercentileSimulation**
+>WeekNo, Percentile, SimNo, Scenario
+
+**SimulationWeeklyHalfHours** 
+>WeekNo, Scenario, Percentile, HalfHours, SimNo, HHStart, HHEnd, HHPeriod, OriginalSpotPrice, StressedSpotPrice, WindGeneration, PPAQty, CPT
+
+**WeeklyAverageSummary** 
+>SimNo, WeekNo, WeeklyAverageOriginalSpotPrice, WeeklyAverageStressedSpotPrice, WeeklyWindGeneration(MWh), HedgingScenario
+
+**HalfHourPeriods** 
+>WeekNo, Start_HH_Ending, End_HH_Ending, Start_HH_Beginning, End_HH_Beginning
